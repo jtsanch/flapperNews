@@ -1,10 +1,22 @@
 var mongoose = require("mongoose");
+var crypto   = require("crypto");
 
-var CommentSchema = new mongoose.Schema({
-	body:String,
-	author:String,
-	upvotes:{type:Number, default:0},
-	post: {type: mongoose.Schema.Types.ObjectId, ref: 'Post'}
+var UserSchema = new mongoose.Schema({
+	email         : {type: String, lowercase:true, unique: true},
+	name          : String,
+	hash 		  : String,
+	salt 		  : String  
 });
 
-mongoose.model('Comment', CommentSchema);
+UserSchema.methods.setPassword = function(password){
+	this.salt = crypto.randomBytes(16).toString('hex');
+	this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
+}
+
+UserSchema.methods.authenticate = function(password){
+	var tempHash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
+
+	return tempHash === this.hash;
+}
+
+mongoose.model('User', UserSchema);
