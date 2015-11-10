@@ -1,5 +1,7 @@
 var mongoose = require("mongoose");
 var crypto   = require("crypto");
+var jwt = require('express-jwt');
+var auth = jwt({secret: 'DEV-SECRET', userProperty: 'payload'});
 
 var UserSchema = new mongoose.Schema({
 	email         : {type: String, lowercase:true, unique: true},
